@@ -1,0 +1,126 @@
+<link rel="import" href="../../bower_components/polymer/polymer-element.html">
+<link rel="import" href="../../bower_components/paper-dialog/paper-dialog.html">
+<link rel="import" href="../../bower_components/paper-dialog-scrollable/paper-dialog-scrollable.html">
+<link rel="import" href="../../bower_components/paper-styles/color.html">
+<link rel="import" href="../../bower_components/paper-button/paper-button.html">
+
+<dom-module id="part-dialog">
+  <template>
+    <style is="custom-style">
+      :host {
+        display: block;
+      }
+      paper-dialog{
+        min-width: 400px;
+      }
+      .error h2.title{
+        background: var(--paper-red-500);
+        color: #FFFFFF;
+        margin: 0;
+        padding: 20px 10px;
+      }
+      .success h2.title{
+        background: var(--paper-green-500);
+        color: #FFFFFF;
+        margin: 0;
+        padding: 20px 10px;
+      }
+      .info h2.title{
+        background: var(--paper-blue-500);
+        color: #FFFFFF;
+        margin: 0;
+        padding: 20px 10px;
+      }
+      .info paper-button{
+        background: var(--paper-blue-500);
+        color: #FFFFFF;
+      }
+      .error paper-button{
+        background: var(--paper-red-500);
+        color: #FFFFFF;
+      }
+      .success paper-button{
+        background: var(--paper-green-500);
+        color: #FFFFFF;
+      }
+      .button-wrapper{
+        margin: 20px 0;
+        text-align: center;
+      }
+    </style>
+    
+    <paper-dialog class$="[[type]]" id="dialog">
+      <h2 class="title">[[title]]</h2>
+      <paper-dialog-scrollable>
+        [[content]]
+      </paper-dialog-scrollable>
+      <div class="button-wrapper">
+        
+        <paper-button raised dialog-dismiss>[[confirmLabel]]</paper-button>
+        
+      </div>
+    </paper-dialog>
+    
+  </template>
+  <script>
+    class PartDialog extends Polymer.Element {
+      static get is() { return 'part-dialog'; }
+      static get properties(){
+        return {
+          title : {
+            type : String,
+            value : "Title Dialog",
+            reflectToAttribute : true
+          },
+          content : {
+            type : String,
+            value : "Title Content",
+            reflectToAttribute : true
+          },
+          type : {
+            type : String,
+            value : "info",
+            reflectToAttribute : true
+          },
+          confirmLabel : {
+            type : String,
+            computed : '_labelBasedOnType(type)'
+          }
+        }
+      }
+      open(){
+        this.$.dialog.open();
+      }
+      info(title, content){
+        this.title = title;
+        this.content = content;
+        this.type = "info";
+        this.$.dialog.open();
+      }
+      success(title, content){
+        this.title = title;
+        this.content = content;
+        this.type = "success";
+        this.$.dialog.open();
+      }
+      error(title, content){
+        this.title = title;
+        this.content = content;
+        this.type = "error";
+        this.$.dialog.open();
+      }
+      _labelBasedOnType(type){
+        if(type == "info"){
+          return "Confirmed";
+        }
+        if(type == "error"){
+          return "Close";
+        }
+        if(type == "success"){
+          return "Ok";
+        }
+      }
+    }
+  window.customElements.define(PartDialog.is, PartDialog);
+  </script>
+</dom-module>
