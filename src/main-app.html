@@ -240,7 +240,7 @@ subject to an additional IP rights grant found at http://polymer.github.io/PATEN
         }
       }
 
-      ajaxCall(data){
+      ajaxCall(data, headers){
         let defaultRequest = {
           method : "GET",
           url : "",
@@ -255,7 +255,10 @@ subject to an additional IP rights grant found at http://polymer.github.io/PATEN
         ajax.method = request.method;
         ajax.url = request.url;
         ajax.body = JSON.stringify(request.body);
-        
+        ajax.contentType = request.contentType;
+        if(headers != null){
+          ajax.headers = headers;
+        }
         let xhr = ajax.generateRequest();
         xhr.send();
         
