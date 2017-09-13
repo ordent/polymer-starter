@@ -1,0 +1,82 @@
+<link rel="import" href="../../bower_components/polymer/polymer-element.html">
+<link rel="import" href="../../bower_components/paper-dialog/paper-dialog.html">
+<link rel="import" href="../../bower_components/paper-dialog-scrollable/paper-dialog-scrollable.html">
+<link rel="import" href="../../bower_components/paper-button/paper-button.html">
+<dom-module id="parts-dialog">
+  <template>
+    <style>
+      :host {
+        display: block;
+        min-width: 75%;
+        
+      }
+      paper-dialog h2{
+        margin: 0;
+        padding: 10px;
+      }
+      paper-dialog.info h2{
+        background: var(--app-info-color);
+        color: white;
+      }
+      paper-dialog.success h2{
+        background: var(--app-success-color);
+        color: white;
+      }
+      paper-dialog.error h2{
+        background: var(--app-error-color);
+        color: white;
+      }
+    </style>
+    <paper-dialog class$="[[data.type]]">
+      <h2>[[data.title]]</h2>
+      <paper-dialog-scrollable>
+        [[data.content]]
+      </paper-dialog-scrollable>
+      <div class="button-wrapper">
+        <template is="dom-if" if=[[data.cancel]]>
+          <paper-button dialog-dismiss raised>[[data.cancelText]]</paper-button>
+        </template>
+        <template is="dom-if" if=[[data.confirmation]]>
+          <paper-button dialog-confirm autofocus raised>[[data.confirmationText]]</paper-button>  
+        </template>
+      </div>
+    </paper-dialog>
+    
+  </template>
+  <script>
+    class PartsDialog extends Polymer.Element {
+      static get is() { return 'parts-dialog'; }
+      static get properties(){
+        return {
+          data : {
+            type : Object,
+            value : function(){
+              return {
+                type : "info",
+                title : "Dialog Title",
+                content : "Dialog Content",
+                cancel : true,
+                confirmation : true,
+                cancelText : "Cancel",
+                confirmationText : "Agree"
+              }
+            }
+          }
+        }
+      }
+      getData(){
+        return this.data;
+      }
+      open(data){
+        if(data != null){
+          this.set("data", Object.assign({}, this.data, data));
+        }
+        this.shadowRoot.querySelector("paper-dialog").open();
+      }
+      close(){
+        this.shadowRoot.querySelector("paper-dialog").open();
+      }
+    }
+  window.customElements.define(PartsDialog.is, PartsDialog);
+  </script>
+</dom-module>

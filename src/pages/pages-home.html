@@ -1,0 +1,41 @@
+<link rel="import" href="../../bower_components/polymer/polymer-element.html">
+<link rel="import" href="../main-state.html">
+<link rel="import" href="../layout/pages-standard.html">
+<dom-module id="pages-home">
+  <template>
+    <style>
+      :host {
+        display: block;
+      }
+    </style>
+    Page Home
+  </template>
+  <script>
+    class PagesHome extends PagesStandard {
+      static get is() { return 'pages-home'; }
+      static get properties(){
+        return {
+          
+        }
+      }
+      connectedCallback(){
+        super.connectedCallback();
+        this.dispatch('dashboardChange', false);
+      }
+
+      static get actions(){
+        return {
+          dashboardChange : function(state){
+            return {
+              type : 'DASHBOARD_STATE',
+              dashboard : state
+            }
+          }
+        }
+      }
+
+      
+    }
+  window.customElements.define(PagesHome.is, PagesHome);
+  </script>
+</dom-module>

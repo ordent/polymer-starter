@@ -1,0 +1,268 @@
+<!--
+@license
+Copyright (c) 2016 The Polymer Project Authors. All rights reserved.
+This code may only be used under the BSD style license found at http://polymer.github.io/LICENSE.txt
+The complete set of authors may be found at http://polymer.github.io/AUTHORS.txt
+The complete set of contributors may be found at http://polymer.github.io/CONTRIBUTORS.txt
+Code distributed by Google as part of the polymer project is also
+subject to an additional IP rights grant found at http://polymer.github.io/PATENTS.txt
+-->
+
+<link rel="import" href="../bower_components/polymer/polymer-element.html">
+<link rel="import" href="../bower_components/app-layout/app-drawer/app-drawer.html">
+<link rel="import" href="../bower_components/app-layout/app-drawer-layout/app-drawer-layout.html">
+<link rel="import" href="../bower_components/app-layout/app-header/app-header.html">
+<link rel="import" href="../bower_components/app-layout/app-header-layout/app-header-layout.html">
+<link rel="import" href="../bower_components/app-layout/app-scroll-effects/app-scroll-effects.html">
+<link rel="import" href="../bower_components/app-layout/app-toolbar/app-toolbar.html">
+<link rel="import" href="../bower_components/app-route/app-location.html">
+<link rel="import" href="../bower_components/app-route/app-route.html">
+<link rel="import" href="../bower_components/iron-pages/iron-pages.html">
+<link rel="import" href="../bower_components/iron-selector/iron-selector.html">
+<link rel="import" href="../bower_components/paper-icon-button/paper-icon-button.html">
+<link rel="import" href="../bower_components/iron-ajax/iron-ajax.html">
+<link rel="import" href="styles/main-icons.html">
+<link rel="import" href="styles/main-styles.html">
+<link rel="import" href="parts/parts-dashboard.html">
+<link rel="import" href="parts/parts-header.html">
+<link rel="import" href="parts/parts-footer.html">
+<link rel="import" href="parts/parts-dialog.html">
+<link rel="import" href="./main-state.html">
+<link rel="lazy-import" href="pages/pages-home.html">
+<link rel="lazy-import" href="errors/main-view404.html">
+
+<dom-module id="main-app">
+  <template>
+    <style>
+      :host {
+        --app-primary-color: #4285f4;
+        --app-text-color-on-dark : white;
+        --app-text-color-on-light : #333;
+        --app-header-color: var(--app-primary-color);
+        --app-footer-color: #333;
+        --app-secondary-color: orange;
+        --app-info-color : #2196F3;
+        --app-success-color : #43A047;
+        --app-error-color : #EF5350;
+        --app-warning-color : #EF6C00;
+        display: block;
+      }
+
+      app-drawer-layout:not([narrow]) [drawer-toggle] {
+        display: none;
+      }
+
+      app-header {
+        color: #fff;
+        background-color: var(--app-primary-color);
+      }
+
+      app-header paper-icon-button {
+        --paper-icon-button-ink-color: white;
+      }
+
+      app-drawer .right{
+        margin-left: auto;
+      }
+
+      iron-pages{
+        min-height: 688px;
+      }
+      @media(max-width:420px){
+        iron-pages{
+          min-height: 450px;
+        } 
+      }
+    </style>
+
+    <app-location route="{{route}}" url-space-regex="^[[rootPath]]"></app-location>
+    <app-route
+        route="[[route]]"
+        pattern="[[rootPath]]:page"
+        data="{{routeData}}"
+        tail="{{subroute}}"></app-route>
+    <app-route
+        route="[[subroute]]"
+        pattern="/:id"
+        data="{{subrouteData}}"</app-route>
+
+    <app-drawer-layout fullbleed narrow="{{narrow}}" force-narrow>
+      <!-- Drawer content -->
+      <!-- // only shown when the state is true -->
+      <template is="dom-if" if=[[dashboardState]]>
+        <app-drawer id="drawer" slot="drawer" swipe-open="[[narrow]]" force-narrow>
+          <app-toolbar>Menu 
+          <paper-icon-button icon="main-icons:close" class="right" on-tap="drawerClose"></paper-icon-button>
+          </app-toolbar>
+          <iron-selector selected="[[page]]" attr-for-selected="name" class="drawer-list" role="navigation">
+            <parts-dashboard data="[[rootPath]]"></parts-dashboard>
+          </iron-selector>
+        </app-drawer>
+      </template>
+
+      <!-- Main content -->
+      <app-header-layout has-scrolling-region>
+        <app-header slot="header" condenses reveals effects="waterfall">
+          <parts-header data="[[rootPath]]" title="[[siteInfo.header.title]]"></parts-header>
+        </app-header>
+        <iron-pages
+            selected="[[page]]"
+            attr-for-selected="name"
+            fallback-selection="view404"
+            role="main" selected-item="{{pageSelected}}">
+          <pages-home name="home"></pages-home>
+          <main-view404 name="view404"></main-view404>
+        </iron-pages>
+        <parts-footer data="[[siteInfo.footer.text]]"></parts-footer>
+      </app-header-layout>
+    </app-drawer-layout>
+    <parts-dialog id="dialog"></parts-dialog>
+    
+    <iron-ajax id="jsonAjax" handle-as="json"></iron-ajax>
+  </template>
+
+  <script>
+    class MainApp extends StateMixin(Polymer.Element)  {
+      static get is() { return 'main-app'; }
+
+      static get properties() {
+        return {
+          page: {
+            type: String,
+            reflectToAttribute: true,
+            observer: '_pageChanged',
+          },
+          uuid : String,
+          dashboardState : {
+            type : Boolean,
+            statePath : 'siteInfo.dashboard.state'
+          },
+          siteInfo : {
+            type : Object,
+            statePath : 'siteInfo'
+          },
+          routeData: {
+            type : Object,
+            observer : "_routePageChanged"
+          },
+          subrouteData: {
+            type : Object,
+            observer : "_routeDataPageChanged"
+          },
+          pageSelected : {
+            type : Object,
+            observer : "_pageLoaded"
+          },
+          subroute: String,
+          // This shouldn't be neccessary, but the Analyzer isn't picking up
+          // Polymer.Element#rootPath
+          rootPath: String,
+        };
+      }
+
+      connectedCallback(){
+        super.connectedCallback();
+        const state = this.getState();
+        window.app = {};
+        this.addEventListener('dom-change', this._listenEvent);
+        this.addEventListener('state-changed', this._echoEvent);
+      }
+
+      disconnectedCallback(){
+        super.disconnectedCallback();
+        this.removeEventListener('dom-change', this._listenEvent);
+      }
+
+      _listenEvent(e){
+        window.app.app = this;
+        window.app.drawer = this.shadowRoot.querySelector("#drawer");
+        window.app.dialog = this.shadowRoot.querySelector("#dialog");
+      }
+      
+      _echoEvent(e){
+        console.log(e.detail);
+      }
+
+      drawerClose(e){
+        if(window.app.drawer){
+          window.app.drawer.close();
+        }
+      }
+
+      _routeDataPageChanged(data){
+        if(data.hasOwnProperty("id")){
+          this.uuid = data.id;
+        }
+      }
+
+      _routePageChanged(data) {
+        // If no page was found in the route data, page will be an empty string.
+        // Deault to 'view1' in that case.
+        if(data.hasOwnProperty("page")){
+          this.page = data.page || 'home';
+        }
+
+        // Close a non-persistent drawer when the page & route are changed.
+        if(this.shadowRoot.querySelector("#drawer")){
+          if (!this.shadowRoot.querySelector("#drawer").persistent) {
+            this.shadowRoot.querySelector("#drawer").close();
+          }
+        }
+        
+      }
+
+      _pageChanged(page) {
+        // Load page import on demand. Show 404 page if fails
+        // routes processing
+        var resolvedPageUrl = null;
+        if(page == 'view404'){
+          resolvedPageUrl = this.resolveUrl('/src/errors/main-view404.html');
+        }else{
+          resolvedPageUrl = this.resolveUrl('/src/pages/pages-' + page + '.html');          
+        }
+        
+        Polymer.importHref(
+            resolvedPageUrl,
+            null,
+            this._showPage404.bind(this),
+            true);
+        window.app = {};
+        
+      }
+
+      _showPage404() {
+        this.page = 'view404';
+      }
+
+      _pageLoaded(n, o){
+        if(n != undefined){
+          window.app.polymer = n;
+        }
+      }
+
+      ajaxCall(data){
+        let defaultRequest = {
+          method : "GET",
+          url : "",
+          body : {},
+          contentType : "application/json"
+        };
+
+        let request = Object.assign({}, defaultRequest, data);
+        console.log(request);
+        let ajax = this.shadowRoot.querySelector("#jsonAjax");
+
+        ajax.method = request.method;
+        ajax.url = request.url;
+        ajax.body = JSON.stringify(request.body);
+        
+        let xhr = ajax.generateRequest();
+        xhr.send();
+        
+        return xhr.completes;
+      }
+    }
+
+    window.customElements.define(MainApp.is, MainApp);
+  </script>
+</dom-module>

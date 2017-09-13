@@ -1,0 +1,58 @@
+<link rel="import" href="../../bower_components/polymer/polymer-element.html">
+<dom-module id="parts-dashboard">
+  <template>
+    <style>
+      :host {
+        display: block;
+        margin: 0 20px;
+      }
+
+      a {
+        display: block;
+        padding: 0 16px;
+        text-decoration: none;
+        color: var(--app-secondary-color);
+        line-height: 40px;
+      }
+
+      a.iron-selected {
+        color: black;
+        font-weight: bold;
+      }
+
+      :host(.toolbar) a{
+        display: inline-block;
+        padding: 0 16px;
+        text-decoration: none;
+        color: white;
+        line-height: 40px;
+      }
+      /* tablet */
+      @media(min-width: 420px) and (max-width : 768px){
+        :host(.toolbar){
+          display: none;
+        }
+      }
+      /* // phone */
+      @media(max-width: 420px){
+        :host(.toolbar){
+          display: none;
+        }
+      }
+    </style>
+    <a name="view1" href="[[data]]view1">View One</a>
+    <a name="view2" href="[[data]]view2">View Two</a>
+    <a name="view3" href="[[data]]view3">View Three</a>
+  </template>
+  <script>
+    class PartsDahboard extends Polymer.Element {
+      static get is() { return 'parts-dashboard'; }
+      static get properties(){
+        return {
+          
+        }
+      }
+    }
+  window.customElements.define(PartsDahboard.is, PartsDahboard);
+  </script>
+</dom-module>

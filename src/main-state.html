@@ -1,0 +1,39 @@
+<link rel="import" href="../bower_components/polymer-redux/polymer-redux.html">
+
+<script>
+  const initialState = {
+    siteInfo : {
+      header : {
+        title : "Ordent App"
+      },
+      dashboard : {
+        state : true
+      },
+      footer : {
+        text : "2017 Ordent Studio - Bandung"
+      }
+    },
+    authorization : {
+      user : {},
+      isLoggedIn : false
+    }
+  };
+
+  const currentState = initialState;
+
+  const reducer = (state, action) => {
+    if(!state) return initialState;
+        
+    switch(action.type){
+      case 'DASHBOARD_STATE' : 
+        const val = action.dashboard;
+        var change = Object.assign({}, state.siteInfo, {dashboard : {state : val}});
+        return Object.assign({}, state, {siteInfo : change});
+      default:
+        return state;
+    }
+    
+  }
+  const store = Redux.createStore(reducer);
+  const StateMixin = PolymerRedux(store);
+</script>

@@ -1,0 +1,28 @@
+<link rel="import" href="../../bower_components/polymer/polymer-element.html">
+<link rel="import" href="../../bower_components/responsive-flex/responsive-flex.html">
+<link rel="import" href="../styles/main-styles.html">
+<dom-module id="parts-footer">
+  <template>
+    <style include="main-styles responsive-flex">
+      :host {
+        display: block;
+        min-height:50px;
+        background: var(--app-footer-color);
+        color: var(--app-text-color-on-dark);
+      }
+    </style>
+    <div class="container">
+      <div class="row">
+        <div class="responsive-xl-12">
+          <p class="text-center">&copy; [[data]]</p>
+        </div>
+      </div>
+    </div>
+  </template>
+  <script>
+    class PartsFooter extends Polymer.Element {
+      static get is() { return 'parts-footer'; }
+    }
+  window.customElements.define(PartsFooter.is, PartsFooter);
+  </script>
+</dom-module>

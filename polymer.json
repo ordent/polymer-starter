@@ -1,0 +1,32 @@
+{
+  "entrypoint": "index.html",
+  "shell": "src/main-app.html",
+  "fragments": [
+    "src/pages/pages-home.html",
+    "src/main-state.html"
+  ],
+  "sources": [
+    "src/**/*",
+    "images/**/*",
+    "bower.json"
+  ],
+  "extraDependencies": [
+    "manifest.json",
+    "node_modules/redux/dist/redux.min.js",
+    "bower_components/webcomponentsjs/*.js"
+  ],
+  "lint": {
+    "rules": ["polymer-2"]
+  },
+  "builds": [
+    {
+      "preset": "es5-bundled"
+    },
+    {
+      "preset": "es6-bundled"
+    },
+    {
+      "preset": "es6-unbundled"
+    }
+  ]
+}

@@ -1,0 +1,35 @@
+<link rel="import" href="../../bower_components/polymer/polymer-element.html">
+<dom-module id="pages-standard">
+  <template>
+    <style>
+      :host {
+        display: block;
+      }
+    </style>
+  </template>
+  <script>
+    class PagesStandard extends StateMixin(Polymer.Element) {
+      static get is() { return 'pages-standard'; }
+      static get properties(){
+        return {
+          data : {
+            type : Object,
+            value : function(){
+              return {}
+            },
+            observer : "_initChanged"
+          }
+        }
+      }
+      _initChanged(n){
+        if(n != undefined && n != null){
+          this._initData(n);
+        }
+      }
+      _initData(n){
+        // get the first data
+      }
+    }
+  window.customElements.define(PagesStandard.is, PagesStandard);
+  </script>
+</dom-module>
